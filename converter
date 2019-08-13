@@ -1,0 +1,13 @@
+import requests
+from bs4 import BeautifulSoup
+from decimal import Decimal
+
+def convert(amount, cur_from, cur_to, date):
+    response = requests.get("https://www.cbr.ru/scripts/XML_daily.asp?date_req={}".format(date))
+    result = amount * (Decimal(str(soup.find('CharCode', text=cur_from).find_next_sibling('Value').string).replace(',', '.')) if cur_from != cur_from else 1)
+    soup = BeautifulSoup(response.content,"xml")
+    value = Decimal(soup.find('CharCode', text=cur_to).find_next_sibling('Value').string.replace(',','.'))
+    id = soup.find('CharCode', text='cur_to').parent['ID']
+    nominal = Decimal(soup.find('Valute',ID=id).Nominal.string.replace(',','.'))
+    result *= (nominal/value)
+    return result.quantize(Decimal('1.0000'))
